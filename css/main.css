@@ -1,0 +1,50 @@
+body {
+    background-color: #fffafa;
+}
+
+#app{
+	background-color:#fffafa;
+}
+
+.testStartButton, .testEndButton, .mainContainer, .testContainer, .tfButtons{
+	display:flex;
+	justify-content: center;
+}
+
+.list{
+	width: 200px;
+	margin: 15px;
+	border-radius: 10px;
+}
+
+.list.normal, .list.test{
+	background-color: #87ceeb;
+}
+
+.list.cleared{
+	background-color:#eee8aa;
+}
+
+.list.notCleared{
+	background-color:#ffc0cb;
+}
+
+.word{
+	margin: 10px;
+	background-color: white;
+	display:flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.listLabel{	
+	display:flex;
+	justify-content: center;
+}
+
+.addWordForm{
+	display:flex;
+	flex-direction: column;
+	align-items: center;
+}
+

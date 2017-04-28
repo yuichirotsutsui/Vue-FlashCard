@@ -1,155 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-
-#app{
-	background-color:#fffafa;
-}
-
-.testStartButton, .testEndButton, .mainContainer, .testContainer, .tfButtons{
-	display:flex;
-	justify-content: center;
-}
-
-.list{
-	width: 200px;
-	margin: 15px;
-	border-radius: 10px;
-}
-
-.list.normal, .list.test{
-	background-color: #87ceeb;
-}
-
-.list.cleared{
-	background-color:#eee8aa;
-}
-
-.list.notCleared{
-	background-color:#ffc0cb;
-}
-
-.word{
-	margin: 10px;
-	background-color: white;
-	display:flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.listLabel{	
-	display:flex;
-	justify-content: center;
-}
-
-.addWordForm{
-	display:flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-</style>
+    <meta charset="utf8">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body bgcolor="#fffafa">
+<body>
 <div id="app">
 	<div class="title">
 		Vue Flash Card
-	</div>
-	<div v-if="currentPage == 'mainPage'">
-		<div class="testStartButton">
-			<button @click="startTest">テストスタート</button>
-		</div>
-		<div class="mainContainer">
-			<div class="list normal">
-				<div class="listLabel">
-					Cards
-				</div>
-				<div class="wordContainer">
-					<div v-for="word in normalWordList" class="word">
-						<div>{{word.english}}</div>
-						<div>{{word.japanese}}</div>
-					</div>
-					<div class="addWordForm">
-						<form @submit.prevent="addNewWord" class="addWordForm">
-							<input v-model="newEnglish" placeholder="input">
-							<input v-model="newJapanese" placeholder="input">
-							<button type="submit">追加</button>
-						</form>
-					</div>
-				</div>
-			</div>
-			<div class="list cleared">
-				<div class="listLabel">
-					Cleared
-				</div>
-		 		<div class="wordContainer">
-		  			<div v-for="word in clearedWordList" class="word">
-		   				<div>{{word.english}}</div>
-						<div>{{word.japanese}}</div>
-		    		</div>
-			 	</div>
-			</div>
-			<div class="list notCleared">
-				<div class="listLabel">
-					Not Cleared
-				</div>
-				<div class="wordContainer">
-					<div v-for="word in notClearedWordList" class="word">
-			        	<div>{{word.english}}</div>
-						<div>{{word.japanese}}</div>
-		        	</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div v-else-if="currentPage == 'testPage'">
-		<div class="testEndButton">
-			<form @sumit.prevent="endTest">
-				<button type="submit">テスト終了</button>
-			</form>
-		</div>
-		<div class="testContainer">
-			<div class="list test">
-				<div class="listLabel">
-					Test Card
-				</div>
-				<div class="word">
-					{{test.wordList[test.wordCount].english}}
-					<div class="tfButtons">
-						<div class="tButton">
-							<button @click="goNext">わかる</button>
-						</div>
-						<div class="fButton">		
-							<button @click="showAnswer">わからない</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div v-else-if="currentPage == 'answerPage'">
-		<div class="testEndButton">
-			<form @sumit.prevent="endTest">
-				<button type="submit">テスト終了</button>
-			</form>
-		</div>
-		<div class="testContainer">
-			<div class="list test">
-				<div class="listLabel">
-					Test Card
-				</div>
-				<div class="word">
-					{{test.wordList[test.wordCount].english}}
-					{{test.wordList[test.wordCount].japanese}}
-					<div class="tfButtons">
-						<div class="tButton">
-							<button @click="goNext">次の単語へ</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+        <main-page v-if="currentPage === 'mainPage'"></main-page>
+        <test-page v-if="currentPage === 'testPage'"></test-page>
+        <answer-page v-if="currentPage === 'answerPage'"></answer-page>
 	</div>
 </div>
 
