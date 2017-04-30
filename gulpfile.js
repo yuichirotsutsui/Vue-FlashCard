@@ -8,9 +8,8 @@ const moduleName = 'flashcard';
 const destination = './dist/';
 
 gulp.task('build', () => 
-    browserify()
+    browserify('./src/')
         .transform(babelify)
-        .require('./src/', {expose: moduleName})
         .bundle()
         .pipe(source('flashcard.js'))
         .pipe(buffer())
