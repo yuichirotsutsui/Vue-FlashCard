@@ -2,7 +2,7 @@
 'use strict';
 
 var dataManager = require('./data-manager');
-var wordList = dataManager.data;
+var words = dataManager.data;
 
 var _require = require('./pages'),
     MainPage = _require.MainPage,
@@ -10,79 +10,52 @@ var _require = require('./pages'),
     AnswerPage = _require.AnswerPage;
 
 module.exports = {
-	el: "#app",
+  el: "#app",
 
-	template: '\n    <div class="app">\n      <div class="title">\n        Vue Flash Card\n        <main-page v-if="currentPage === \'mainPage\'"></main-page>\n        <test-page v-if="currentPage === \'testPage\'"></test-page>\n        <answer-page v-if="currentPage === \'answerPage\'"></answer-page>\n      </div>\n    </div>\n  ',
+  template: '\n    <div class="app">\n      <div class="title">\n        Vue Flash Card\n        <main-page v-if="currentPage === \'mainPage\'" :words="words"></main-page>\n        <test-page v-if="currentPage === \'testPage\'"></test-page>\n        <answer-page v-if="currentPage === \'answerPage\'"></answer-page>\n      </div>\n    </div>\n  ',
 
-	components: { MainPage: MainPage, TestPage: TestPage, AnswerPage: AnswerPage },
+  components: { MainPage: MainPage, TestPage: TestPage, AnswerPage: AnswerPage },
 
-	data: {
-		wordList: wordList,
-		currentPage: "mainPage",
-		newEnglish: "",
-		newJapanese: "",
-		test: {
-			wordList: [],
-			wordCount: 0
-		}
-	},
+  data: {
+    words: words,
+    currentPage: "mainPage",
+    test: {
+      wordList: [],
+      wordCount: 0
+    }
+  },
 
-	computed: {
-		normalWordList: function normalWordList() {
-			return this.wordList.filter(function (element) {
-				return !element.done;
-			});
-		},
-		clearedWordList: function clearedWordList() {
-			return this.wordList.filter(function (element) {
-				return element.done && element.cleared;
-			});
-		},
-		notClearedWordList: function notClearedWordList() {
-			return this.wordList.filter(function (element) {
-				return element.done && !element.cleared;
-			});
-		}
-	},
+  methods: {
+    startTest: function startTest(testWords) {
+      this.test.wordCount = 0;
+      this.test.wordList = testWords;
+      if (this.test.wordList.length != 0) {
+        this.currentPage = "testPage";
+      }
+    },
+    endTest: function endTest() {
+      this.currentPage = "mainPage";
+    },
+    goNext: function goNext() {
+      this.test.wordList[this.test.wordCount].done = true;
+      if (this.currentPage === "testPage") {
+        this.test.wordList[this.test.wordCount].cleared = true;
+      }
+      if (this.test.wordCount + 1 === this.test.wordList.length) {
+        this.currentPage = "mainPage";
+      } else {
+        this.test.wordCount += 1;
+        this.currentPage = "testPage";
+      }
+    },
+    showAnswer: function showAnswer() {
+      this.currentPage = "answerPage";
+    }
+  },
 
-	methods: {
-		addNewWord: function addNewWord() {
-			if (this.newEnglish != "" && this.newJapanese != "") {
-				this.wordList.push({ english: this.newEnglish, japanese: this.newJapanese, done: false, cleared: false });
-				this.newEnglish = "";
-				this.newJapanese = "";
-			}
-		},
-		startTest: function startTest() {
-			this.test.wordCount = 0;
-			this.test.wordList = this.normalWordList.concat(this.notClearedWordList);
-			if (this.test.wordList.length != 0) {
-				this.currentPage = "testPage";
-			}
-		},
-		endTest: function endTest() {
-			this.currentPage = "mainPage";
-		},
-		goNext: function goNext() {
-			this.test.wordList[this.test.wordCount].done = true;
-			if (this.currentPage === "testPage") {
-				this.test.wordList[this.test.wordCount].cleared = true;
-			}
-			if (this.test.wordCount + 1 === this.test.wordList.length) {
-				this.currentPage = "mainPage";
-			} else {
-				this.test.wordCount += 1;
-				this.currentPage = "testPage";
-			}
-		},
-		showAnswer: function showAnswer() {
-			this.currentPage = "answerPage";
-		}
-	},
-
-	updated: function updated() {
-		dataManager.save();
-	}
+  updated: function updated() {
+    dataManager.save();
+  }
 };
 
 },{"./data-manager":2,"./pages":4}],2:[function(require,module,exports){
@@ -105,7 +78,7 @@ var DataManager = function () {
   _createClass(DataManager, [{
     key: "load",
     value: function load() {
-      _data = localStorage.getItem(storageKey) || [];
+      _data = JSON.parse(localStorage.getItem(storageKey)) || [];
     }
   }, {
     key: "save",
@@ -134,17 +107,83 @@ module.exports = {
 },{}],4:[function(require,module,exports){
 'use strict';
 
-var MainPage = require('./main');
-var AnswerPage = require('./answer');
-var TestPage = require('./test');
+var MainPage = require('./main-page');
+var AnswerPage = require('./answer-page');
+var TestPage = require('./test-page');
 
 module.exports = { MainPage: MainPage, AnswerPage: AnswerPage, TestPage: TestPage };
 
-},{"./answer":3,"./main":5,"./test":6}],5:[function(require,module,exports){
-"use strict";
+},{"./answer-page":3,"./main-page":5,"./test-page":6}],5:[function(require,module,exports){
+'use strict';
+
+var Word = {
+  template: '\n    <div class="word">\n      <div>{{ word.english }}</div>\n      <div>{{ word.japanese }}</div>\n    </div>\n  ',
+  props: ['word']
+};
+
+var AddWordForm = {
+  template: '\n    <div class="addWordForm">\n      <form @submit.prevent="addNewWord" class="addWordForm">\n        <input v-model="english" placeholder="English">\n        <input v-model="japanese" placeholder="\u65E5\u672C\u8A9E">\n        <button type="submit">\u8FFD\u52A0</button>\n      </form>\n    </div>\n  ',
+  data: function data() {
+    return {
+      english: '',
+      japanese: ''
+    };
+  },
+
+  methods: {
+    addNewWord: function addNewWord() {
+      var english = this.english,
+          japanese = this.japanese;
+
+      if (english !== '' && japanese !== '') {
+        this.$root.words.push({ english: english, japanese: japanese, done: false, cleared: false });
+        this.clearForm();
+      }
+    },
+    clearForm: function clearForm() {
+      this.english = '';
+      this.japanese = '';
+    }
+  }
+};
+
+var List = {
+  template: '\n    <div :class="\'list \' + className">\n      <div class="listLabel">\n        {{ label }}\n      </div>\n      <div class="wordContainer">\n        <word v-for="word in words" :word="word"></word>\n        <add-word-form v-if="addable"></add-word-form>\n      </div>\n    </div>\n  ',
+  components: { Word: Word, AddWordForm: AddWordForm },
+  props: ['words', 'className', 'label', 'addable']
+};
 
 module.exports = {
-  template: "\n    <div>\n      <div class=\"testStartButton\">\n        <button @click=\"startTest\">\u30C6\u30B9\u30C8\u30B9\u30BF\u30FC\u30C8</button>\n      </div>\n      <div class=\"mainContainer\">\n        <div class=\"list normal\">\n          <div class=\"listLabel\">\n            Cards\n          </div>\n          <div class=\"wordContainer\">\n            <div v-for=\"word in normalWordList\" class=\"word\">\n              <div>{{word.english}}</div>\n              <div>{{word.japanese}}</div>\n            </div>\n            <div class=\"addWordForm\">\n              <form @submit.prevent=\"addNewWord\" class=\"addWordForm\">\n                <input v-model=\"newEnglish\" placeholder=\"input\">\n                <input v-model=\"newJapanese\" placeholder=\"input\">\n                <button type=\"submit\">\u8FFD\u52A0</button>\n              </form>\n            </div>\n          </div>\n        </div>\n        <div class=\"list cleared\">\n          <div class=\"listLabel\">\n            Cleared\n          </div>\n          <div class=\"wordContainer\">\n              <div v-for=\"word in clearedWordList\" class=\"word\">\n                <div>{{word.english}}</div>\n              <div>{{word.japanese}}</div>\n              </div>\n          </div>\n        </div>\n        <div class=\"list notCleared\">\n          <div class=\"listLabel\">\n            Not Cleared\n          </div>\n          <div class=\"wordContainer\">\n            <div v-for=\"word in notClearedWordList\" class=\"word\">\n                  <div>{{word.english}}</div>\n              <div>{{word.japanese}}</div>\n                </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  "
+  template: '\n    <div>\n      <div class="testStartButton">\n        <button @click="startTest">\u30C6\u30B9\u30C8\u30B9\u30BF\u30FC\u30C8</button>\n      </div>\n      <div class="mainContainer">\n        <list :words="normalWords" className="normal" label="Cards" :addable="true"></list>\n        <list :words="clearedWords" className="cleared" label="Cleared"></list>\n        <list :words="notClearedWords" className="notCleared" label="Not Cleared"></list>\n      </div>\n    </div>\n  ',
+  components: { List: List },
+  props: ['words'],
+
+  computed: {
+    normalWords: function normalWords() {
+      return this.words.filter(function (element) {
+        return !element.done;
+      });
+    },
+    clearedWords: function clearedWords() {
+      return this.words.filter(function (element) {
+        return element.done && element.cleared;
+      });
+    },
+    notClearedWords: function notClearedWords() {
+      return this.words.filter(function (element) {
+        return element.done && !element.cleared;
+      });
+    },
+    testWords: function testWords() {
+      return this.normalWords.concat(this.notClearedWords);
+    }
+  },
+
+  methods: {
+    startTest: function startTest() {
+      this.$root.startTest(this.testWords);
+    }
+  }
 };
 
 },{}],6:[function(require,module,exports){

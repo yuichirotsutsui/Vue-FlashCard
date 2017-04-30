@@ -11,7 +11,7 @@ class DataManager {
   }
 
   load() {
-    _data = localStorage.getItem(storageKey) || [];
+    _data = JSON.parse(localStorage.getItem(storageKey)) || [];
   }
 
   save() {
