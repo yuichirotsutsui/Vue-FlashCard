@@ -6,50 +6,29 @@ var words = dataManager.data;
 
 var _require = require('./pages'),
     MainPage = _require.MainPage,
-    TestPage = _require.TestPage,
-    AnswerPage = _require.AnswerPage;
+    TestPage = _require.TestPage;
 
 module.exports = {
   el: "#app",
 
-  template: '\n    <div class="app">\n      <div class="title">\n        Vue Flash Card\n        <main-page v-if="currentPage === \'mainPage\'" :words="words"></main-page>\n        <test-page v-if="currentPage === \'testPage\'"></test-page>\n        <answer-page v-if="currentPage === \'answerPage\'"></answer-page>\n      </div>\n    </div>\n  ',
+  template: '\n    <div class="app">\n      <div class="title">\n        Vue Flash Card\n        <main-page v-if="!testStarted" :words="words"></main-page>\n        <test-page v-show="testStarted" ref="testPage"></test-page>\n      </div>\n    </div>\n  ',
 
-  components: { MainPage: MainPage, TestPage: TestPage, AnswerPage: AnswerPage },
+  components: { MainPage: MainPage, TestPage: TestPage },
 
   data: {
     words: words,
-    currentPage: "mainPage",
-    test: {
-      wordList: [],
-      wordCount: 0
-    }
+    testStarted: false
   },
 
   methods: {
     startTest: function startTest(testWords) {
-      this.test.wordCount = 0;
-      this.test.wordList = testWords;
-      if (this.test.wordList.length != 0) {
-        this.currentPage = "testPage";
+      if (testWords.length > 0) {
+        this.$refs.testPage.startTest(testWords);
+        this.testStarted = true;
       }
     },
-    endTest: function endTest() {
-      this.currentPage = "mainPage";
-    },
-    goNext: function goNext() {
-      this.test.wordList[this.test.wordCount].done = true;
-      if (this.currentPage === "testPage") {
-        this.test.wordList[this.test.wordCount].cleared = true;
-      }
-      if (this.test.wordCount + 1 === this.test.wordList.length) {
-        this.currentPage = "mainPage";
-      } else {
-        this.test.wordCount += 1;
-        this.currentPage = "testPage";
-      }
-    },
-    showAnswer: function showAnswer() {
-      this.currentPage = "answerPage";
+    finishTest: function finishTest() {
+      this.testStarted = false;
     }
   },
 
@@ -58,7 +37,7 @@ module.exports = {
   }
 };
 
-},{"./data-manager":2,"./pages":4}],2:[function(require,module,exports){
+},{"./data-manager":2,"./pages":3}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -98,22 +77,14 @@ var DataManager = function () {
 module.exports = new DataManager();
 
 },{}],3:[function(require,module,exports){
-"use strict";
-
-module.exports = {
-  template: "\n    <div>\n      <div class=\"testEndButton\">\n        <form @submit.prevent=\"endTest\">\n          <button type=\"submit\">\u30C6\u30B9\u30C8\u7D42\u4E86</button>\n        </form>\n      </div>\n      <div class=\"testContainer\">\n        <div class=\"list test\">\n          <div class=\"listLabel\">\n            Test Card\n          </div>\n          <div class=\"word\">\n            {{test.wordList[test.wordCount].english}}\n            {{test.wordList[test.wordCount].japanese}}\n            <div class=\"tfButtons\">\n              <div class=\"tButton\">\n                <button @click=\"goNext\">\u6B21\u306E\u5358\u8A9E\u3078</button>\n              </div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  "
-};
-
-},{}],4:[function(require,module,exports){
 'use strict';
 
 var MainPage = require('./main-page');
-var AnswerPage = require('./answer-page');
 var TestPage = require('./test-page');
 
-module.exports = { MainPage: MainPage, AnswerPage: AnswerPage, TestPage: TestPage };
+module.exports = { MainPage: MainPage, TestPage: TestPage };
 
-},{"./answer-page":3,"./main-page":5,"./test-page":6}],5:[function(require,module,exports){
+},{"./main-page":4,"./test-page":5}],4:[function(require,module,exports){
 'use strict';
 
 var Word = {
@@ -186,18 +157,73 @@ module.exports = {
   }
 };
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
-module.exports = {
-  template: "\n    <div>\n      <div class=\"testEndButton\">\n        <form @submit.prevent=\"endTest\">\n          <button type=\"submit\">\u30C6\u30B9\u30C8\u7D42\u4E86</button>\n        </form>\n      </div>\n      <div class=\"testContainer\">\n        <div class=\"list test\">\n          <div class=\"listLabel\">\n            Test Card\n          </div>\n          <div class=\"word\">\n            {{test.wordList[test.wordCount].english}}\n            <div class=\"tfButtons\">\n              <div class=\"tButton\">\n                <button @click=\"goNext\">\u308F\u304B\u308B</button>\n              </div>\n              <div class=\"fButton\">\t\t\n                <button @click=\"showAnswer\">\u308F\u304B\u3089\u306A\u3044</button>\n              </div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  "
+var TestCard = {
+  template: "\n    <div class=\"word\">\n      {{ $parent.currentWord.english }}\n      <div class=\"tfButtons\">\n        <div class=\"tButton\">\n          <button @click=\"$parent.goNext\">\u308F\u304B\u308B</button>\n        </div>\n        <div class=\"fButton\">\t\t\n          <button @click=\"$parent.showAnswer\">\u308F\u304B\u3089\u306A\u3044</button>\n        </div>\n      </div>\n    </div>\n  "
 };
 
-},{}],7:[function(require,module,exports){
+var AnswerCard = {
+  template: "\n    <div class=\"word\">\n      {{ $parent.currentWord.english }}\n      {{ $parent.currentWord.japanese }}\n      <div class=\"tfButtons\">\n        <div class=\"tButton\">\n          <button @click=\"$parent.goNext\">{{ $parent.isLastWord ? '\u30C6\u30B9\u30C8\u3092\u7D42\u4E86\u3059\u308B' : '\u6B21\u306E\u5358\u8A9E\u3078' }}</button>\n        </div>\n      </div>\n    </div>\n  "
+};
+
+module.exports = {
+  template: "\n    <div>\n      <div class=\"testEndButton\">\n        <button @click=\"finishTest\" type=\"submit\">\u30C6\u30B9\u30C8\u7D42\u4E86</button>\n      </div>\n      <div class=\"testContainer\">\n        <div class=\"list test\">\n          <div class=\"listLabel\">\n            Test Card\n          </div>\n          <test-card v-if=\"!answerShown\"></test-card>\n          <answer-card v-else></answer-card>\n        </div>\n      </div>\n    </div>\n  ",
+  components: { TestCard: TestCard, AnswerCard: AnswerCard },
+
+  data: function data() {
+    return {
+      words: [],
+      index: 0,
+      answerShown: false
+    };
+  },
+
+
+  computed: {
+    currentWord: function currentWord() {
+      return this.words[this.index] || {};
+    },
+    isLastWord: function isLastWord() {
+      return this.index + 1 === this.words.length;
+    }
+  },
+
+  methods: {
+    startTest: function startTest(words) {
+      this.words = words;
+      this.index = 0;
+    },
+    goNext: function goNext() {
+      this.currentWord.done = true;
+      if (this.answerShown) {
+        this.hideAnswer();
+      } else {
+        this.currentWord.cleared = true;
+      }
+      if (this.isLastWord) {
+        this.finishTest();
+      }
+      this.index += 1;
+    },
+    showAnswer: function showAnswer() {
+      this.answerShown = true;
+    },
+    hideAnswer: function hideAnswer() {
+      this.answerShown = false;
+    },
+    finishTest: function finishTest() {
+      this.$root.finishTest();
+    }
+  }
+};
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var app = require('./app');
 
 new Vue(app);
 
-},{"./app":1}]},{},[7]);
+},{"./app":1}]},{},[6]);

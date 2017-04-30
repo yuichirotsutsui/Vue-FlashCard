@@ -1,6 +1,6 @@
 const dataManager = require('./data-manager');
 const words = dataManager.data;
-const { MainPage, TestPage, AnswerPage } = require('./pages');
+const { MainPage, TestPage } = require('./pages');
 
 module.exports = {
   el: "#app",
@@ -9,57 +9,33 @@ module.exports = {
     <div class="app">
       <div class="title">
         Vue Flash Card
-        <main-page v-if="currentPage === 'mainPage'" :words="words"></main-page>
-        <test-page v-if="currentPage === 'testPage'"></test-page>
-        <answer-page v-if="currentPage === 'answerPage'"></answer-page>
+        <main-page v-if="!testStarted" :words="words"></main-page>
+        <test-page v-show="testStarted" ref="testPage"></test-page>
       </div>
     </div>
   `,
 
-  components: { MainPage, TestPage, AnswerPage },
+  components: { MainPage, TestPage },
 
   data: {
     words,
-    currentPage: "mainPage",
-    test: {
-      wordList: [],
-      wordCount: 0
-    }
+    testStarted: false
   },
 
   methods: {
     startTest(testWords) {
-      this.test.wordCount = 0;
-      this.test.wordList = testWords;
-      if (this.test.wordList.length != 0) {
-        this.currentPage = "testPage";
+      if (testWords.length > 0) {
+        this.$refs.testPage.startTest(testWords);
+        this.testStarted = true;
       }
     },
-
-    endTest() {
-      this.currentPage = "mainPage";
-    },
-
-    goNext() {
-      this.test.wordList[this.test.wordCount].done = true;
-      if (this.currentPage === "testPage") {
-        this.test.wordList[this.test.wordCount].cleared = true;
-      }
-      if (this.test.wordCount + 1 === this.test.wordList.length) {
-        this.currentPage = "mainPage";
-      } else {
-        this.test.wordCount += 1;
-        this.currentPage = "testPage";
-      }
-    },
-
-    showAnswer() {
-      this.currentPage = "answerPage";
+    finishTest() {
+      this.testStarted = false;
     }
   },
 
   updated() {
     dataManager.save();
-  }
+  },
 };
 
