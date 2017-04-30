@@ -69,6 +69,9 @@ module.exports = {
       this.words = words;
       this.index = 0;
     },
+    finishTest() {
+      this.$root.finishTest();
+    },
     goNext() {
       this.currentWord.done = true;
       if(this.answerShown) {
@@ -86,9 +89,6 @@ module.exports = {
     },
     hideAnswer() {
       this.answerShown = false;
-    },
-    finishTest() {
-      this.$root.finishTest();
     },
   },
 };

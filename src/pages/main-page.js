@@ -74,16 +74,16 @@ module.exports = {
 
   computed: {
     normalWords() {
-      return this.words.filter((element) => !element.done);
+      return this.words.filter((word) => !word.done);
     },
     clearedWords() {
-      return this.words.filter((element) => (element.done && element.cleared));
+      return this.words.filter((word) => (word.done && word.cleared));
     },
     notClearedWords() {
-      return this.words.filter((element) => (element.done && !element.cleared));
+      return this.words.filter((word) => (word.done && !word.cleared));
     },
     testWords() {
-      return this.normalWords.concat(this.notClearedWords);
+      return this.words.filter((word) => (!word.cleared));
     }
   },
 

@@ -132,22 +132,24 @@ module.exports = {
 
   computed: {
     normalWords: function normalWords() {
-      return this.words.filter(function (element) {
-        return !element.done;
+      return this.words.filter(function (word) {
+        return !word.done;
       });
     },
     clearedWords: function clearedWords() {
-      return this.words.filter(function (element) {
-        return element.done && element.cleared;
+      return this.words.filter(function (word) {
+        return word.done && word.cleared;
       });
     },
     notClearedWords: function notClearedWords() {
-      return this.words.filter(function (element) {
-        return element.done && !element.cleared;
+      return this.words.filter(function (word) {
+        return word.done && !word.cleared;
       });
     },
     testWords: function testWords() {
-      return this.normalWords.concat(this.notClearedWords);
+      return this.words.filter(function (word) {
+        return !word.cleared;
+      });
     }
   },
 
@@ -196,6 +198,9 @@ module.exports = {
       this.words = words;
       this.index = 0;
     },
+    finishTest: function finishTest() {
+      this.$root.finishTest();
+    },
     goNext: function goNext() {
       this.currentWord.done = true;
       if (this.answerShown) {
@@ -213,9 +218,6 @@ module.exports = {
     },
     hideAnswer: function hideAnswer() {
       this.answerShown = false;
-    },
-    finishTest: function finishTest() {
-      this.$root.finishTest();
     }
   }
 };
