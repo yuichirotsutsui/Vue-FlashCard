@@ -12,7 +12,7 @@ const AddWordForm = {
   template: `
     <div class="addWordForm">
       <form @submit.prevent="addNewWord" class="addWordForm">
-        <input v-model="english" placeholder="English">
+        <input v-model="english" ref="englishInput" placeholder="English">
         <input v-model="japanese" placeholder="日本語">
         <button type="submit">追加</button>
       </form>
@@ -35,6 +35,7 @@ const AddWordForm = {
     clearForm() {
       this.english = '';
       this.japanese = '';
+      this.$refs.englishInput.focus();
     }
   }
 };

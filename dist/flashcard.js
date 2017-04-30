@@ -93,7 +93,7 @@ var Word = {
 };
 
 var AddWordForm = {
-  template: '\n    <div class="addWordForm">\n      <form @submit.prevent="addNewWord" class="addWordForm">\n        <input v-model="english" placeholder="English">\n        <input v-model="japanese" placeholder="\u65E5\u672C\u8A9E">\n        <button type="submit">\u8FFD\u52A0</button>\n      </form>\n    </div>\n  ',
+  template: '\n    <div class="addWordForm">\n      <form @submit.prevent="addNewWord" class="addWordForm">\n        <input v-model="english" ref="englishInput" placeholder="English">\n        <input v-model="japanese" placeholder="\u65E5\u672C\u8A9E">\n        <button type="submit">\u8FFD\u52A0</button>\n      </form>\n    </div>\n  ',
   data: function data() {
     return {
       english: '',
@@ -114,6 +114,7 @@ var AddWordForm = {
     clearForm: function clearForm() {
       this.english = '';
       this.japanese = '';
+      this.$refs.englishInput.focus();
     }
   }
 };
